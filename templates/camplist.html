@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Blood Camps{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-geo-alt" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">Blood Camp Management</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Camps</h3>
+      <div class="text-muted">Organize and manage donation camps</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if user.is_superuser %}
+        <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-arrow-left me-2"></i>Back</a>
+      {% else %}
+        <a class="btn btn-outline-gradient" href="{% url 'landing' %}"><i class="bi bi-arrow-left me-2"></i>Back</a>
+      {% endif %}
+      <a class="btn btn-gradient" href="{% url 'camp_create' %}"><i class="bi bi-plus-circle me-2"></i>Create Camp</a>
+    </div>
+  </div>
+
+  <div class="table-responsive mt-3 bb-table">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Date</th>
+          <th>Organizers</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for camp in camps %}
+          <tr>
+            <td class="fw-semibold">{{ camp.location }}</td>
+            <td class="text-muted">
+              <div class="d-flex align-items-center gap-2">
+                <span>{{ camp.date }}</span>
+                {% if today and camp.date < today %}
+                  <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">Expired</span>
+                {% endif %}
+              </div>
+            </td>
+            <td class="text-muted">{{ camp.organizers }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">No camps yet. Create your first camp.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
