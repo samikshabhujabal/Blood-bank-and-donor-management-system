@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Registered{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-check2-circle" style="color: var(--bb-blue)"></i>
+        <span class="small fw-semibold">Eligibility Check Completed</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">{{ donor.name }}</h3>
+      <div class="text-muted">Blood Group: <span class="fw-semibold" style="color: var(--bb-red)">{{ donor.blood_group }}</span></div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'donor_register' %}">Register Another</a>
+      <a class="btn btn-gradient" href="{% url 'donor_detail' donor.id %}">Open Profile</a>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    {% if donor.eligibility_status == 'ELIGIBLE' %}
+      <div class="alert alert-success">Eligible to donate.</div>
+      <div class="d-grid">
+        <a class="btn btn-gradient" href="{% url 'record_donation' %}?donor={{ donor.id }}"><i class="bi bi-droplet-half me-2"></i>Record Donation</a>
+      </div>
+    {% else %}
+      <div class="alert alert-warning">Not eligible to donate.</div>
+      {% if donor.ineligible_reason %}
+        <div class="text-muted">Reason: {{ donor.ineligible_reason }}</div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
