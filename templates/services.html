@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Services | AI Blood Bank{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-grid" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">Services</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Services</h3>
+      <div class="text-muted">Explore the main modules available in the system.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'landing' %}"><i class="bi bi-house me-2"></i>Home</a>
+      <a class="btn btn-outline-gradient" href="{% url 'about' %}"><i class="bi bi-info-circle me-2"></i>About</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-search-heart me-2" style="color: var(--bb-red)"></i>Find Blood</div>
+        <div class="text-muted small mb-3">Search donors and blood banks with live filters.</div>
+        <a class="btn btn-gradient w-100" href="{% url 'find_blood' %}">Open</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-person-heart me-2" style="color: var(--bb-blue)"></i>Donor Matching</div>
+        <div class="text-muted small mb-3">Find eligible donors by blood group and city.</div>
+        <a class="btn btn-outline-gradient w-100" href="{% url 'find_donor' %}">Open</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-hospital me-2" style="color: var(--bb-blue)"></i>Blood Banks</div>
+        <div class="text-muted small mb-3">View blood bank details and available groups.</div>
+        <a class="btn btn-outline-gradient w-100" href="{% url 'find_blood_bank' %}">Open</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle me-2" style="color: var(--bb-red)"></i>Emergency Request</div>
+        <div class="text-muted small mb-3">Submit urgent blood requests and track status.</div>
+        <a class="btn btn-outline-gradient w-100" href="{% url 'emergency_request' %}">Open</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-box-seam me-2" style="color: var(--bb-blue)"></i>Inventory</div>
+        <div class="text-muted small mb-3">Track stock, expiry buckets, and transactions.</div>
+        <a class="btn btn-outline-gradient w-100" href="{% url 'inventory_status' %}">Open</a>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <div class="bb-glass p-4 h-100">
+        <div class="fw-bold mb-1"><i class="bi bi-calendar-event me-2" style="color: var(--bb-red)"></i>Blood Camps</div>
+        <div class="text-muted small mb-3">Create and manage blood donation camps.</div>
+        <a class="btn btn-outline-gradient w-100" href="{% url 'camp_list' %}">Open</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

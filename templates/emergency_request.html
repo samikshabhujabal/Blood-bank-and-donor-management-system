@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}Emergency Request{% endblock %}
+
+{% block head %}
+<style>
+.emergency-header {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.emergency-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.urgency-high {
+  border-left: 4px solid #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.urgency-medium {
+  border-left: 4px solid #ffc107;
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.urgency-low {
+  border-left: 4px solid #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.hotline-card {
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  color: white;
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.hotline-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.emergency-steps {
+  counter-reset: step-counter;
+}
+
+.emergency-step {
+  position: relative;
+  padding-left: 3rem;
+  margin-bottom: 2rem;
+}
+
+.emergency-step::before {
+  counter-increment: step-counter;
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  border-left: 2px solid #dee2e6;
+  padding-bottom: 1rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bb-red);
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-pending { background: #ffc107; color: #000; }
+.status-processing { background: #17a2b8; color: white; }
+.status-fulfilled { background: #28a745; color: white; }
+.status-cancelled { background: #dc3545; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-exclamation-triangle-fill text-danger emergency-pulse"></i>
+        <span class="small fw-semibold">Emergency Services</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Emergency Blood Request</h3>
+      <div class="text-muted">Urgent blood requirement for patients in critical need</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-arrow-left me-2"></i>Back</a>
+    </div>
+  </div>
+
+  <div class="emergency-header">
+    <i class="bi bi-telephone-fill display-1 mb-3"></i>
+    <h2 class="fw-bold mb-3">24/7 Emergency Hotline</h2>
+    <div class="hotline-number">1-800-BLOOD-HELP</div>
+    <p class="mb-0">Available 24 hours a day, 7 days a week for emergency blood requests</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="bb-glass p-4">
+        <h5 class="fw-bold mb-4"><i class="bi bi-clipboard-plus me-2"></i>Submit Emergency Request</h5>
+        
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            {% for field in form %}
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+            <div class="col-12">
+              <button type="submit" class="btn btn-danger btn-lg w-100">
+                <i class="bi bi-exclamation-triangle me-2"></i>Submit Emergency Request
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="mt-4 bb-glass p-4">
+        <h5 class="fw-bold mb-4"><i class="bi bi-clock-history me-2"></i>Recent Emergency Requests</h5>
+        
+        <div class="timeline">
+          {% for r in recent_requests %}
+          <div class="timeline-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="fw-bold mb-1">{{ r.hospital_name }}</h6>
+                <p class="text-muted small mb-2">Patient: {{ r.patient_name }} | Blood: {{ r.blood_group_required }} | Units: {{ r.units_needed }}</p>
+                <p class="text-muted small mb-0">Submitted: {{ r.created_at|date:"M d, Y H:i" }}</p>
+              </div>
+              <span class="status-badge status-pending">{{ r.status }}</span>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-muted">No requests yet. Submit the first emergency request.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="hotline-card mb-4">
+        <i class="bi bi-telephone-fill display-4 mb-3"></i>
+        <h5 class="fw-bold">Call Emergency Hotline</h5>
+        <div class="hotline-number">1-800-BLOOD-HELP</div>
+        <p class="small mb-0">For immediate assistance with emergency blood requirements</p>
+      </div>
+
+      <div class="bb-glass p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge me-2"></i>Emergency Process</h5>
+        <div class="emergency-steps">
+          <div class="emergency-step">
+            <h6 class="fw-bold">Submit Request</h6>
+            <p class="text-muted small">Fill out the emergency form with patient details and blood requirements</p>
+          </div>
+          <div class="emergency-step">
+            <h6 class="fw-bold">Verification</h6>
+            <p class="text-muted small">Our team verifies the emergency request within 15 minutes</p>
+          </div>
+          <div class="emergency-step">
+            <h6 class="fw-bold">Donor Matching</h6>
+            <p class="text-muted small">AI system matches eligible donors based on blood group and location</p>
+          </div>
+          <div class="emergency-step">
+            <h6 class="fw-bold">Blood Delivery</h6>
+            <p class="text-muted small">Coordinated blood collection and delivery to hospital</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bb-glass p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Important Information</h5>
+        <ul class="small">
+          <li class="mb-2">Emergency requests are prioritized over regular requests</li>
+          <li class="mb-2">Average response time: 30-45 minutes</li>
+          <li class="mb-2">Blood is sourced from nearest available donors</li>
+          <li class="mb-2">All emergency requests are verified before processing</li>
+          <li class="mb-2">Hospital authorization may be required</li>
+          <li class="mb-0">False emergency requests may face legal action</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

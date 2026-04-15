@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blood Bank | Home{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block content %}
+<section class="hero bb-glass p-4 p-md-5 overflow-hidden">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-cpu-fill" style="color: var(--bb-blue)"></i>
+        <span class="small fw-semibold" data-i18n="ai_ml_matching">AI • ML • Smart Matching</span>
+      </div>
+
+      <h1 class="display-6 fw-bold mt-3" data-i18n="hero_title">AI Powered Blood Bank Management System</h1>
+      <p class="lead text-muted mb-0" data-i18n="hero_subtitle">Smart blood donor matching using AI & Machine Learning</p>
+
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <a class="btn btn-gradient btn-lg" href="{% url 'register' %}"><i class="bi bi-heart-pulse me-2"></i><span data-i18n="become_donor">Become a Donor</span></a>
+        <a class="btn btn-outline-gradient btn-lg" href="{% url 'find_blood' %}"><i class="bi bi-search me-2"></i><span data-i18n="find_blood">Find Blood</span></a>
+        <a class="btn btn-outline-gradient btn-lg" href="#ai"><i class="bi bi-graph-up-arrow me-2"></i><span data-i18n="ai_prediction">AI Prediction</span></a>
+      </div>
+
+      <div class="mt-4 d-flex flex-wrap gap-3">
+        <div class="stock-chip">
+          <div class="stock-badge"><i class="bi bi-droplet-fill"></i></div>
+          <div>
+            <div class="fw-semibold" data-i18n="live_availability">Live Availability</div>
+            <div class="text-muted small" data-i18n="realtime_update">Inventory updated in real-time</div>
+          </div>
+        </div>
+        <div class="stock-chip">
+          <div class="stock-badge"><i class="bi bi-geo-alt-fill"></i></div>
+          <div>
+            <div class="fw-semibold" data-i18n="nearest_donors">Nearest Donors</div>
+            <div class="text-muted small" data-i18n="distance_matching">Distance-based matching</div>
+          </div>
+        </div>
+        <div class="stock-chip">
+          <div class="stock-badge"><i class="bi bi-shield-check"></i></div>
+          <div>
+            <div class="fw-semibold" data-i18n="health_risk_check">Health Risk Check</div>
+            <div class="text-muted small" data-i18n="eligibility_insights">Eligibility insights</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-none d-lg-block mt-4">
+        <img
+          class="bb-photo bb-photo--hero"
+          loading="lazy"
+          src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1200&q=70"
+          alt="Blood donation"
+        >
+        <div class="d-flex justify-content-end mt-2">
+          <img class="bb-illus bb-illus-soft" src="{% static 'img/illus-donation.svg' %}" alt="Blood donation illustration">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="bb-glass bb-card ai-glow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">Live Blood Stock</div>
+          <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">Live</span>
+        </div>
+        <div class="row g-2">
+          {% for bg, units in live_stock_tiles %}
+          <div class="col-6">
+            <div class="bb-glass p-3">
+              <div class="d-flex justify-content-between">
+                <div class="fw-semibold">{{ bg }}</div>
+                <i class="bi bi-droplet" style="color: var(--bb-red)"></i>
+              </div>
+              <div class="display-6 fw-bold mt-1">{{ units }}</div>
+              <div class="text-muted small">units</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <a class="btn btn-outline-gradient btn-sm" href="{% url 'inventory_status' %}"><i class="bi bi-box-seam me-2"></i>View Inventory</a>
+          <span class="text-muted small">Auto-updates on donation</span>
+        </div>
+      </div>
+
+      <div class="bb-glass bb-card p-4 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold"><i class="bi bi-geo-alt-fill me-2" style="color: var(--bb-blue)"></i>Nearest Donors</div>
+          <a class="btn btn-outline-gradient btn-sm" href="{% url 'find_blood' %}">Open Finder</a>
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+          <input class="form-control form-control-sm" id="homeCity" placeholder="Enter your city (e.g. Pune)">
+          <button class="btn btn-gradient btn-sm" id="homeDonorSearch" type="button">Search</button>
+        </div>
+
+        <div id="homeDonors">
+          {% for d in nearest_donors %}
+          <div class="bb-glass p-3 mb-2">
+            <div class="d-flex justify-content-between">
+              <div class="fw-semibold">{{ d.name }}</div>
+              <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">{{ d.blood_group }}</span>
+            </div>
+            <div class="text-muted small">{{ d.city }} • {% if d.last_donation_date %}Last donation: {{ d.last_donation_date }}{% else %}Last donation: Never{% endif %}</div>
+          </div>
+          {% empty %}
+          <div class="text-muted small">No eligible donors yet. Register donors to enable matching.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="bb-glass bb-card p-4 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold"><i class="bi bi-shield-check me-2" style="color: var(--bb-red)"></i>Health Risk Check</div>
+          <a class="btn btn-outline-gradient btn-sm" href="{% url 'donor_register' %}">Check Eligibility</a>
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="bb-glass p-3">
+              <div class="text-muted small">Eligible Donors</div>
+              <div class="h4 fw-bold mb-0">{{ eligible_count }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bb-glass p-3">
+              <div class="text-muted small">Not Eligible</div>
+              <div class="h4 fw-bold mb-0">{{ not_eligible_count }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="text-muted small mt-2">Eligibility is evaluated automatically during donor registration (age, hemoglobin, BP, last donation).</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-bg"></div>
+</section>
+
+
+<section id="features-module" class="pt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="fw-bold mb-1">Platform Features</h3>
+      <div class="text-muted">Explore the powerful modules of our Blood Bank Management System</div>
+    </div>
+    <div class="d-none d-md-flex align-items-center gap-2">
+      <i class="bi bi-stars" style="color: var(--bb-red)"></i>
+      <span class="text-muted small">Modern • Secure • Efficient</span>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-3">
+      <div class="bb-glass bb-card p-4 h-100 text-center">
+        <div class="feature-icon-wrap mb-3 mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(13, 110, 253, 0.1); border-radius: 50%;">
+          <i class="bi bi-cloud-check fs-3" style="color: var(--bb-secondary)"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color: var(--bb-secondary)">Cloud Based</h5>
+        <p class="text-muted small mb-0">Access from any device, anywhere, anytime with secure real-time sync.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="bb-glass bb-card p-4 h-100 text-center">
+        <div class="feature-icon-wrap mb-3 mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(220, 53, 69, 0.1); border-radius: 50%;">
+          <i class="bi bi-file-earmark-bar-graph fs-3" style="color: var(--bb-primary)"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Automated Reports</h5>
+        <p class="text-muted small mb-0">Daily reports delivered via WhatsApp and email automatically.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="bb-glass bb-card p-4 h-100 text-center">
+        <div class="feature-icon-wrap mb-3 mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(25, 135, 84, 0.1); border-radius: 50%;">
+          <i class="bi bi-shield-check fs-3" style="color: var(--bb-success)"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Compliance Made Simple</h5>
+        <p class="text-muted small mb-0">Meets NABH, NBTC, and Drugs & Cosmetics Act guidelines.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="bb-glass bb-card p-4 h-100 text-center">
+        <div class="feature-icon-wrap mb-3 mx-auto" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(69, 123, 157, 0.1); border-radius: 50%;">
+          <i class="bi bi-people fs-3" style="color: var(--bb-blue)"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Staff Activity Tracking</h5>
+        <p class="text-muted small mb-0">Monitor team activities from blood processing to issuance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="camps" class="pt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="fw-bold mb-1">Upcoming Blood Camps</h3>
+      <div class="text-muted">Camps created by admin are visible to everyone</div>
+    </div>
+    {% if user.is_authenticated and user.is_superuser %}
+      <a class="btn btn-outline-gradient" href="{% url 'camp_list' %}"><i class="bi bi-calendar-event me-2"></i>Manage Camps</a>
+    {% endif %}
+  </div>
+
+  <div class="bb-glass bb-card p-3 mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-lg-7">
+        <div class="fw-bold">Join a community drive</div>
+        <div class="text-muted">Find upcoming donation camps near you and register in minutes.</div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block">
+        <img
+          class="bb-photo bb-photo--banner"
+          loading="lazy"
+          src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=70"
+          alt="Hospital and healthcare"
+        >
+        <div class="mt-2">
+          <img class="bb-illus" src="{% static 'img/illus-camp.svg' %}" alt="Blood camp illustration">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {% for camp in upcoming_camps %}
+      <div class="col-md-6 col-lg-4">
+        <div class="bb-glass bb-card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="fw-bold"><i class="bi bi-geo-alt me-2" style="color: var(--bb-red)"></i>{{ camp.location }}</div>
+            <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">{{ camp.date }}</span>
+          </div>
+          <div class="text-muted small mt-2"><i class="bi bi-people me-2" style="color: var(--bb-blue)"></i>{{ camp.organizers }}</div>
+          <div class="d-grid mt-3">
+            <a class="btn btn-gradient" href="{% url 'donor_register' %}"><i class="bi bi-person-plus me-2"></i>Register to Donate</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="bb-glass bb-card p-4 text-muted">No upcoming camps yet.</div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+(() => {
+  const btn = document.getElementById('homeDonorSearch');
+  const input = document.getElementById('homeCity');
+  const wrap = document.getElementById('homeDonors');
+  if (!btn || !input || !wrap) return;
+
+  const escapeHtml = (s) => (s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const render = (items) => {
+    if (!items.length) {
+      wrap.innerHTML = '<div class="text-muted small">No donors found for this city.</div>';
+      return;
+    }
+
+    wrap.innerHTML = items.slice(0, 3).map((d) => {
+      const last = d.last_donation_date ? d.last_donation_date : 'Never';
+      return `
+        <div class="bb-glass p-3 mb-2">
+          <div class="d-flex justify-content-between">
+            <div class="fw-semibold">${escapeHtml(d.name)}</div>
+            <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">${escapeHtml(d.blood_group)}</span>
+          </div>
+          <div class="text-muted small">${escapeHtml(d.city || '')} • Last donation: ${escapeHtml(last)}</div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  btn.addEventListener('click', async () => {
+    const city = input.value.trim();
+    if (!city) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`/api/find-donors/?city=${encodeURIComponent(city)}`);
+      const data = await res.json();
+      render(data.results || []);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+
+
+<section id="smart-search" class="pt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="fw-bold mb-1">Smart Blood Search</h3>
+      <div class="text-muted">Search by blood group, location, and urgency</div>
+    </div>
+    <div class="d-none d-md-flex align-items-center gap-2">
+      <i class="bi bi-activity" style="color: var(--bb-blue)"></i>
+      <span class="text-muted small">AI prioritizes emergencies</span>
+    </div>
+  </div>
+
+  <div class="bb-glass bb-card p-4">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Blood Group</label>
+        <select class="form-select">
+          <option>A+</option>
+          <option>B+</option>
+          <option>O+</option>
+          <option>AB+</option>
+          <option>O-</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Location</label>
+        <select class="form-select">
+          <option>Pune</option>
+          <option>Mumbai</option>
+          <option>Nagpur</option>
+          <option>Delhi</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Urgency Level</label>
+        <select class="form-select">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>Emergency</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <a class="btn btn-gradient btn-lg w-100" href="{% url 'find_blood' %}"><i class="bi bi-search me-2"></i>Find Blood</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="contact" class="pt-5 pb-2">
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="bb-glass bb-card p-4">
+        <h4 class="fw-bold mb-2">About this system</h4>
+        <p class="text-muted mb-0">A clean and futuristic UI for a full-stack Blood Bank Management System. Backend modules (donors, inventory, requests, scheduling, ML predictions, alerts, chatbot) will connect to this UI progressively.</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="bb-glass bb-card p-4 h-100">
+        <div class="fw-bold mb-2">Contact</div>
+        <div class="text-muted small"><i class="bi bi-envelope me-2" style="color: var(--bb-blue)"></i>support@bloodbank.local</div>
+        <div class="text-muted small mt-1"><i class="bi bi-telephone me-2" style="color: var(--bb-blue)"></i>+91 XXXXX XXXXX</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}{% endblock %}

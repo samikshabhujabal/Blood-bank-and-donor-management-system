@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Blood{% endblock %}
+
+{% block head %}
+<style>
+.findblood-hero{
+  background: radial-gradient(900px 420px at 10% 10%, rgba(47,128,237,0.18), rgba(47,128,237,0) 60%),
+              radial-gradient(800px 420px at 90% 0%, rgba(255,59,92,0.16), rgba(255,59,92,0) 55%),
+              linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+}
+
+.findblood-hero{
+  position: relative;
+  overflow: hidden;
+}
+
+.findblood-hero::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 20px;
+  background: conic-gradient(from 180deg, rgba(255,59,92,0.0), rgba(255,59,92,0.32), rgba(47,128,237,0.34), rgba(167,66,245,0.26), rgba(255,59,92,0.0));
+  filter: blur(18px);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: glowSpin 10s linear infinite;
+}
+
+@keyframes glowSpin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
+}
+
+.demo-note{
+  display:none;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.results-panel{
+  min-height: 220px;
+}
+
+.result-card{
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.result-card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+}
+
+.pill-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.tab-btn{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(234,240,255,0.92);
+}
+
+.tab-btn.active{
+  border-color: rgba(47,128,237,0.55);
+  box-shadow: 0 0 0 .2rem rgba(47,128,237,0.18);
+}
+
+.small-kpi{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+}
+
+.mini-muted{
+  color: rgba(234,240,255,0.72);
+}
+
+.loading-dots{
+  display:inline-block;
+  width: 48px;
+  text-align:left;
+}
+
+.loading-dots::after{
+  content: '...';
+  animation: dots 1.2s steps(4,end) infinite;
+}
+
+@keyframes dots{
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60% { content: '...'; }
+  80%, 100% { content: ''; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="findblood-hero p-4 p-md-5 mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <div class="pill-badge mb-3">
+          <i class="bi bi-search-heart" style="color: var(--bb-red)"></i>
+          <span class="small fw-semibold">Smart Find Blood</span>
+        </div>
+        <h2 class="fw-bold mb-2">Find Blood by Group & Location</h2>
+        <div class="mini-muted">Instant results using JavaScript + database APIs</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-gradient" href="{% url 'landing' %}"><i class="bi bi-house me-2"></i>Home</a>
+        <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Blood Group</label>
+        <select class="form-select" id="fbBloodGroup">
+          <option value="">Any</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">City</label>
+        <input class="form-control" id="fbCity" placeholder="e.g. Pune" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Search</label>
+        <input class="form-control" id="fbQuery" placeholder="Name / address / phone" />
+      </div>
+      <div class="col-12 d-flex flex-wrap gap-2 mt-1">
+        <button class="btn btn-gradient" id="fbSearchBtn" type="button"><i class="bi bi-search me-2"></i>Search</button>
+        <button class="btn btn-outline-gradient" id="fbClearBtn" type="button"><i class="bi bi-x-circle me-2"></i>Clear</button>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <div class="small-kpi p-3">
+          <div class="mini-muted small">Mode</div>
+          <div class="fw-semibold" id="fbModeLabel">Donors</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="small-kpi p-3">
+          <div class="mini-muted small">Results</div>
+          <div class="fw-semibold" id="fbResultCount">0</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="small-kpi p-3">
+          <div class="mini-muted small">Tip</div>
+          <div class="fw-semibold">Try blood group + city</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <button class="btn tab-btn active" id="fbTabDonors" type="button"><i class="bi bi-person-heart me-2"></i>Donors</button>
+    <button class="btn tab-btn" id="fbTabBanks" type="button"><i class="bi bi-hospital me-2"></i>Blood Banks</button>
+  </div>
+
+  <div class="results-panel">
+    <div id="fbDemo" class="demo-note text-muted mb-3">
+      Showing demo suggestions because your database has no matching records yet. Add donors/blood banks in Admin to see real results.
+    </div>
+    <div id="fbStatus" class="text-muted mb-2"></div>
+    <div class="row g-3" id="fbResults"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  let mode = 'donors';
+
+  const els = {
+    bg: document.getElementById('fbBloodGroup'),
+    city: document.getElementById('fbCity'),
+    q: document.getElementById('fbQuery'),
+    donorsTab: document.getElementById('fbTabDonors'),
+    banksTab: document.getElementById('fbTabBanks'),
+    searchBtn: document.getElementById('fbSearchBtn'),
+    clearBtn: document.getElementById('fbClearBtn'),
+    status: document.getElementById('fbStatus'),
+    demo: document.getElementById('fbDemo'),
+    results: document.getElementById('fbResults'),
+    count: document.getElementById('fbResultCount'),
+    modeLabel: document.getElementById('fbModeLabel'),
+  };
+
+  const buildUrl = () => {
+    const params = new URLSearchParams();
+    if (els.bg.value) params.set('blood_group', els.bg.value);
+    if (els.city.value.trim()) params.set('city', els.city.value.trim());
+    if (els.q.value.trim()) params.set('q', els.q.value.trim());
+
+    const base = mode === 'donors' ? '{% url "api_find_donors" %}' : '{% url "api_find_blood_banks" %}';
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  };
+
+  const setMode = (next) => {
+    mode = next;
+    els.modeLabel.textContent = mode === 'donors' ? 'Donors' : 'Blood Banks';
+    els.donorsTab.classList.toggle('active', mode === 'donors');
+    els.banksTab.classList.toggle('active', mode === 'banks');
+    els.results.innerHTML = '';
+    els.count.textContent = '0';
+    els.status.textContent = 'Ready.';
+  };
+
+  const escapeHtml = (s) => (s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const render = (items) => {
+    els.results.innerHTML = '';
+    els.count.textContent = String(items.length);
+
+    if (!items.length) {
+      els.status.textContent = 'No results found.';
+      return;
+    }
+
+    els.status.textContent = 'Showing latest matches.';
+
+    if (mode === 'donors') {
+      items.forEach((d) => {
+        const last = d.last_donation_date ? d.last_donation_date : 'Never';
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        card.innerHTML = `
+          <div class="bb-glass p-3 result-card h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <div class="fw-semibold">${escapeHtml(d.name)}</div>
+                <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(d.city || '')}</div>
+              </div>
+              <div class="text-end">
+                <div class="badge" style="background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color: rgba(234,240,255,0.92);">${escapeHtml(d.blood_group)}</div>
+              </div>
+            </div>
+            <div class="text-muted small mt-2">${escapeHtml(d.address || '')}</div>
+            <div class="text-muted small mt-2"><i class="bi bi-calendar-check me-1"></i>Last donation: ${escapeHtml(last)}</div>
+            <div class="d-grid mt-3">
+              <a class="btn btn-gradient" href="tel:${escapeHtml(d.phone_number || '')}"><i class="bi bi-telephone me-2"></i>Call Donor</a>
+            </div>
+          </div>
+        `;
+        els.results.appendChild(card);
+      });
+      return;
+    }
+
+    items.forEach((b) => {
+      const groups = (b.available_blood_groups || []).join(', ');
+      const card = document.createElement('div');
+      card.className = 'col-md-6 col-lg-4';
+      card.innerHTML = `
+        <div class="bb-glass p-3 result-card h-100">
+          <div class="fw-semibold">${escapeHtml(b.name)}</div>
+          <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(b.address || '')}, ${escapeHtml(b.city || '')}</div>
+          <div class="text-muted small mt-2"><i class="bi bi-droplet me-1"></i>${escapeHtml(groups)}</div>
+          <div class="d-grid mt-3">
+            <a class="btn btn-gradient" href="tel:${escapeHtml(b.contact_number || '')}"><i class="bi bi-telephone me-2"></i>Call Blood Bank</a>
+          </div>
+        </div>
+      `;
+      els.results.appendChild(card);
+    });
+  };
+
+  const search = async () => {
+    els.status.innerHTML = 'Searching<span class="loading-dots"></span>';
+    els.results.innerHTML = '';
+    els.count.textContent = '0';
+
+    try {
+      const res = await fetch(buildUrl(), { headers: { 'X-Requested-With': 'fetch' } });
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+      if (els.demo) {
+        els.demo.style.display = data.demo ? 'block' : 'none';
+      }
+      render(data.results || []);
+    } catch (e) {
+      els.status.textContent = 'Could not load results. Please try again.';
+    }
+  };
+
+  const clear = () => {
+    els.bg.value = '';
+    els.city.value = '';
+    els.q.value = '';
+    els.results.innerHTML = '';
+    els.count.textContent = '0';
+    els.status.textContent = 'Cleared.';
+  };
+
+  els.donorsTab.addEventListener('click', () => { setMode('donors'); search(); });
+  els.banksTab.addEventListener('click', () => { setMode('banks'); search(); });
+  els.searchBtn.addEventListener('click', search);
+  els.clearBtn.addEventListener('click', clear);
+
+  [els.bg, els.city, els.q].forEach((el) => el.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      search();
+    }
+  }));
+
+  setMode('donors');
+  search();
+})();
+</script>
+{% endblock %}

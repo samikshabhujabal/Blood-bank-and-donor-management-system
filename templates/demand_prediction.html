@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Demand Prediction{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-graph-up-arrow" style="color: var(--bb-blue)"></i>
+        <span class="small fw-semibold">Analytics</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Blood Demand Prediction</h3>
+      <div class="text-muted">Filter by city and time window (weekly/monthly) to see demand trends.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      <a class="btn btn-outline-gradient" href="{% url 'emergency_request' %}"><i class="bi bi-exclamation-triangle me-2"></i>Requests</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-md-4">
+      <label class="form-label fw-semibold">City</label>
+      <input class="form-control" id="dpCity" placeholder="e.g. Pune" />
+      <div class="text-muted small mt-1">Uses `hospital_city` from requests</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label fw-semibold">Period</label>
+      <select class="form-select" id="dpPeriod">
+        <option value="month" selected>Monthly</option>
+        <option value="week">Weekly</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label fw-semibold">Last N periods</label>
+      <select class="form-select" id="dpLimit">
+        <option value="6">6</option>
+        <option value="8">8</option>
+        <option value="12" selected>12</option>
+        <option value="24">24</option>
+      </select>
+    </div>
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-gradient" type="button" id="dpApply"><i class="bi bi-filter me-2"></i>Apply</button>
+      <button class="btn btn-outline-gradient" type="button" id="dpReset"><i class="bi bi-x-circle me-2"></i>Reset</button>
+    </div>
+  </div>
+
+  <div class="bb-glass p-4 mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-bold">Demand (Units Requested)</div>
+      <span class="text-muted small" id="dpMeta">Loading...</span>
+    </div>
+    <canvas id="dpChart" height="120"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  const cityEl = document.getElementById('dpCity');
+  const periodEl = document.getElementById('dpPeriod');
+  const limitEl = document.getElementById('dpLimit');
+  const applyEl = document.getElementById('dpApply');
+  const resetEl = document.getElementById('dpReset');
+  const metaEl = document.getElementById('dpMeta');
+  const ctx = document.getElementById('dpChart');
+  if (!cityEl || !periodEl || !limitEl || !applyEl || !resetEl || !metaEl || !ctx) return;
+
+  if (typeof Chart === 'undefined') {
+    metaEl.textContent = 'Chart library not loaded.';
+    return;
+  }
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Units',
+        data: [],
+        borderColor: '#2F80ED',
+        backgroundColor: 'rgba(47,128,237,0.18)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const load = async () => {
+    metaEl.textContent = 'Loading...';
+    const params = new URLSearchParams();
+    if (cityEl.value.trim()) params.set('city', cityEl.value.trim());
+    params.set('period', periodEl.value);
+    params.set('limit', limitEl.value);
+
+    const url = `{% url 'api_demand_prediction' %}?${params.toString()}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Request failed');
+      const data = await res.json();
+
+      chart.data.labels = data.labels || [];
+      chart.data.datasets[0].data = data.values || [];
+      chart.update();
+
+      const place = cityEl.value.trim() ? cityEl.value.trim() : 'All cities';
+      metaEl.textContent = `${place} • ${periodEl.value === 'week' ? 'Weekly' : 'Monthly'}`;
+    } catch (e) {
+      metaEl.textContent = 'Could not load analysis.';
+    }
+  };
+
+  applyEl.addEventListener('click', load);
+  resetEl.addEventListener('click', () => {
+    cityEl.value = '';
+    periodEl.value = 'month';
+    limitEl.value = '12';
+    load();
+  });
+
+  load();
+})();
+</script>
+{% endblock %}

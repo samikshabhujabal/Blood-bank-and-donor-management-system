@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Donor{% endblock %}
+
+{% block head %}
+<style>
+.donor-card {
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.donor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.blood-group-large {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  color: white;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+.eligible-badge {
+  background: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.distance-badge {
+  background: #6c757d;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+}
+
+.contact-btn {
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.filter-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.location-btn {
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.location-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.urgency-high {
+  border-left: 4px solid #dc3545;
+}
+
+.urgency-medium {
+  border-left: 4px solid #ffc107;
+}
+
+.urgency-low {
+  border-left: 4px solid #28a745;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-person-heart-fill" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">Donor Matching</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Find Blood Donor</h3>
+      <div class="text-muted">Search for eligible donors by blood group and location</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-arrow-left me-2"></i>Back</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <form class="filter-panel" method="get">
+        <h5 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Search Filters</h5>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Blood Group Required</label>
+          <select class="form-select" id="bloodGroupFilter" name="blood_group">
+            <option value="">All Blood Groups</option>
+            <option value="A+" {% if selected_blood_group == 'A+' %}selected{% endif %}>A+</option>
+            <option value="A-" {% if selected_blood_group == 'A-' %}selected{% endif %}>A-</option>
+            <option value="B+" {% if selected_blood_group == 'B+' %}selected{% endif %}>B+</option>
+            <option value="B-" {% if selected_blood_group == 'B-' %}selected{% endif %}>B-</option>
+            <option value="O+" {% if selected_blood_group == 'O+' %}selected{% endif %}>O+</option>
+            <option value="O-" {% if selected_blood_group == 'O-' %}selected{% endif %}>O-</option>
+            <option value="AB+" {% if selected_blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+            <option value="AB-" {% if selected_blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Search (name/city/address/phone)</label>
+          <input class="form-control" name="q" value="{{ search_q|default:'' }}" placeholder="e.g. Priya, Pune, 9876...">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Distance</label>
+          <select class="form-select">
+            <option>Within 5 km</option>
+            <option>Within 10 km</option>
+            <option>Within 25 km</option>
+            <option>Within 50 km</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Last Donation</label>
+          <select class="form-select">
+            <option>No restriction</option>
+            <option>More than 3 months ago</option>
+            <option>More than 6 months ago</option>
+            <option>More than 1 year ago</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Urgency Level</label>
+          <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" name="urgency" id="urgency-low" autocomplete="off" checked>
+            <label class="btn btn-outline-success" for="urgency-low">Low</label>
+            
+            <input type="radio" class="btn-check" name="urgency" id="urgency-medium" autocomplete="off">
+            <label class="btn btn-outline-warning" for="urgency-medium">Medium</label>
+            
+            <input type="radio" class="btn-check" name="urgency" id="urgency-high" autocomplete="off">
+            <label class="btn btn-outline-danger" for="urgency-high">Emergency</label>
+          </div>
+        </div>
+
+        <button class="btn btn-gradient w-100 mb-3" type="submit">
+          <i class="bi bi-search me-2"></i>Search Donors
+        </button>
+
+        <button class="location-btn w-100">
+          <i class="bi bi-crosshair me-2"></i>Use My Current Location
+        </button>
+      </form>
+
+      <div class="mt-4">
+        <h6 class="fw-bold mb-3">Quick Stats</h6>
+        <div class="bb-glass p-3 mb-2">
+          <div class="d-flex justify-content-between">
+            <span>Total Eligible Donors</span>
+            <span class="fw-bold">{{ donors|length }}</span>
+          </div>
+        </div>
+        <div class="bb-glass p-3 mb-2">
+          <div class="d-flex justify-content-between">
+            <span>Available Now</span>
+            <span class="fw-bold text-success">{{ donors|length }}</span>
+          </div>
+        </div>
+        <div class="bb-glass p-3">
+          <div class="d-flex justify-content-between">
+            <span>Nearby (10km)</span>
+            <span class="fw-bold text-primary">{{ donors|length|add:"-2" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Available Donors</h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-gradient">
+            <i class="bi bi-sort-down me-1"></i>Sort by Distance
+          </button>
+          <button class="btn btn-sm btn-outline-gradient">
+            <i class="bi bi-calendar me-1"></i>Sort by Availability
+          </button>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        {% for donor in donors %}
+        <div class="col-md-6">
+          <div class="card donor-card h-100 {% cycle 'urgency-low' 'urgency-medium' 'urgency-high' %}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h6 class="fw-bold mb-1">{{ donor.name }}</h6>
+                  <p class="text-muted small mb-2">
+                    <i class="bi bi-geo-alt me-1"></i>{{ donor.city }}{% if donor.address %}, {{ donor.address }}{% endif %}
+                  </p>
+                  <p class="text-muted small mb-2">
+                    <i class="bi bi-telephone me-1"></i>{{ donor.phone_number }}
+                  </p>
+                </div>
+                <div class="text-end">
+                  <div class="blood-group-large mb-2">{{ donor.blood_group }}</div>
+                  <span class="eligible-badge">Eligible</span>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="small text-muted">
+                  <i class="bi bi-calendar-check me-1"></i>
+                  Last donation: {% if donor.last_donation_date %}{{ donor.last_donation_date|date:"M d, Y" }}{% else %}Never{% endif %}
+                </div>
+                <div class="distance-badge">
+                  <i class="bi bi-geo-alt-fill me-1"></i>{{ forloop.counter|add:"2" }} km
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <a class="contact-btn flex-fill text-center text-decoration-none" href="tel:{{ donor.phone_number }}">
+                  <i class="bi bi-telephone-fill me-1"></i>Contact
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="text-center py-5">
+            <i class="bi bi-person-x display-1 text-muted"></i>
+            <h5 class="mt-3">No donors found</h5>
+            <p class="text-muted">Try adjusting your search filters</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">Previous</a>
+          </li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Awareness | AI Blood Bank{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-megaphone" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">Awareness</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Blood Donation Awareness</h3>
+      <div class="text-muted">Learn, share, and encourage safe blood donation.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-gradient" href="{% url 'landing' %}"><i class="bi bi-house me-2"></i>Home</a>
+      <a class="btn btn-outline-gradient" href="{% url 'services' %}"><i class="bi bi-grid me-2"></i>Services</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-lg-7">
+      <div class="bb-glass p-4">
+        <h5 class="fw-bold mb-2">Why donate blood?</h5>
+        <div class="text-muted">A single donation can save up to three lives. Regular donations help maintain blood availability for surgeries, accidents, and emergencies.</div>
+
+        <hr style="border-color: rgba(255,255,255,0.12)">
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <div class="bb-glass p-3">
+              <div class="fw-semibold"><i class="bi bi-check2-circle me-2" style="color: var(--bb-blue)"></i>Basic Eligibility</div>
+              <div class="text-muted small">Age 18–60, good health, Hb ≥ 12.5 g/dL.</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="bb-glass p-3">
+              <div class="fw-semibold"><i class="bi bi-clock me-2" style="color: var(--bb-red)"></i>Donation Interval</div>
+              <div class="text-muted small">At least 90 days between donations.</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="bb-glass p-3">
+              <div class="fw-semibold"><i class="bi bi-droplet me-2" style="color: var(--bb-red)"></i>Stay Hydrated</div>
+              <div class="text-muted small">Drink water before and after donation.</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="bb-glass p-3">
+              <div class="fw-semibold"><i class="bi bi-shield-check me-2" style="color: var(--bb-blue)"></i>Safe Process</div>
+              <div class="text-muted small">Sterile equipment is used for every donor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="bb-glass p-4">
+        <h5 class="fw-bold mb-2">Take Action</h5>
+        <div class="text-muted small">Register as a donor and help your community.</div>
+        <div class="d-grid gap-2 mt-3">
+          <a class="btn btn-gradient" href="{% url 'donor_register' %}"><i class="bi bi-person-plus me-2"></i>Register as Donor</a>
+          <a class="btn btn-outline-gradient" href="{% url 'camp_list' %}"><i class="bi bi-calendar-event me-2"></i>View Camps</a>
+          <a class="btn btn-outline-gradient" href="{% url 'find_blood' %}"><i class="bi bi-search-heart me-2"></i>Find Blood</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

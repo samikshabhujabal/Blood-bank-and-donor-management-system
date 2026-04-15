@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Status{% endblock %}
+
+{% block head %}
+<style>
+.inventory-card {
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.inventory-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.blood-stock-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  margin: 0 auto 1rem;
+  position: relative;
+}
+
+.blood-stock-circle::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bb-red), var(--bb-blue));
+  z-index: -1;
+}
+
+.stock-high { background: linear-gradient(135deg, #28a745, #20c997); }
+.stock-medium { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+.stock-low { background: linear-gradient(135deg, #dc3545, #e83e8c); }
+.stock-critical { background: linear-gradient(135deg, #6f42c1, #dc3545); }
+
+.stock-percentage {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.expiry-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid #ffc107;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.expiry-critical {
+  background: rgba(220, 53, 69, 0.1);
+  border-left: 4px solid #dc3545;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin: 20px 0;
+}
+
+.filter-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.alert-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.alert-green { background: #28a745; }
+.alert-yellow { background: #ffc107; }
+.alert-red { background: #dc3545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-box-seam-fill" style="color: var(--bb-blue)"></i>
+        <span class="small fw-semibold">Inventory Management</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Blood Inventory Status</h3>
+      <div class="text-muted">Real-time blood stock levels and expiry tracking</div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-gradient" onclick="refreshInventory()">
+        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+      </button>
+      <a class="btn btn-outline-gradient" href="{% url 'dashboard' %}"><i class="bi bi-arrow-left me-2"></i>Back</a>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stats-card">
+        <i class="bi bi-droplet-fill display-4 text-primary mb-2"></i>
+        <h6 class="fw-bold">Total Units</h6>
+        <h3 class="mb-0">{{ total_units }}</h3>
+        <small class="text-muted">Available units</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <i class="bi bi-exclamation-triangle-fill display-4 text-warning mb-2"></i>
+        <h6 class="fw-bold">Low Stock</h6>
+        <h3 class="mb-0">{{ low_stock_count }}</h3>
+        <small class="text-muted">Below 10 units</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <i class="bi bi-clock-fill display-4 text-danger mb-2"></i>
+        <h6 class="fw-bold">Expiring Soon</h6>
+        <h3 class="mb-0">{{ expiring_soon_count }}</h3>
+        <small class="text-muted">Within 7 days</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card">
+        <i class="bi bi-graph-up display-4 text-success mb-2"></i>
+        <h6 class="fw-bold">Daily Usage</h6>
+        <h3 class="mb-0">28</h3>
+        <small class="text-muted">Average units/day</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <div class="filter-panel">
+        <h5 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Filters</h5>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Blood Group</label>
+          <select class="form-select">
+            <option>All Blood Groups</option>
+            <option>A+</option>
+            <option>A-</option>
+            <option>B+</option>
+            <option>B-</option>
+            <option>O+</option>
+            <option>O-</option>
+            <option>AB+</option>
+            <option>AB-</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Stock Level</label>
+          <select class="form-select">
+            <option>All Levels</option>
+            <option>Critical (&lt;5)</option>
+            <option>Low (5-10)</option>
+            <option>Medium (11-25)</option>
+            <option>High (&gt;25)</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Expiry Status</label>
+          <select class="form-select">
+            <option>All Status</option>
+            <option>Expiring in 3 days</option>
+            <option>Expiring in 7 days</option>
+            <option>Expiring in 30 days</option>
+            <option>Fresh stock</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Location</label>
+          <select class="form-select">
+            <option>All Locations</option>
+            <option>Main Bank</option>
+            <option>City Hospital</option>
+            <option>Regional Center</option>
+          </select>
+        </div>
+
+        <button class="btn btn-gradient w-100">
+          <i class="bi bi-search me-2"></i>Apply Filters
+        </button>
+      </div>
+
+      <div class="mt-4 bb-glass p-3">
+        <h6 class="fw-bold mb-3">Stock Alerts</h6>
+        <div class="mb-2">
+          <span class="alert-indicator alert-red"></span>
+          <small>O- Critical: 4 units</small>
+        </div>
+        <div class="mb-2">
+          <span class="alert-indicator alert-yellow"></span>
+          <small>AB- Low: 8 units</small>
+        </div>
+        <div class="mb-2">
+          <span class="alert-indicator alert-yellow"></span>
+          <small>B+ Low: 9 units</small>
+        </div>
+        <div class="mb-0">
+          <span class="alert-indicator alert-green"></span>
+          <small>O+ Good: 45 units</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <!-- Blood Stock Grid -->
+      <div class="row g-3 mb-4">
+        {% for stock in stocks %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card inventory-card h-100">
+            <div class="card-body text-center">
+              <div class="blood-stock-circle {% if stock.available_units < 5 %}stock-critical{% elif stock.available_units < 10 %}stock-low{% elif stock.available_units < 25 %}stock-medium{% else %}stock-high{% endif %}">
+                {{ stock.blood_group }}
+                <div class="stock-percentage">{{ stock.available_units }} units</div>
+              </div>
+              
+              <h6 class="fw-bold mb-3">{{ stock.blood_group }} Blood Group</h6>
+              
+              <div class="row text-center mb-3">
+                <div class="col-4">
+                  <small class="text-muted d-block">Available</small>
+                  <strong>{{ stock.available_units }}</strong>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Total</small>
+                  <strong>{{ stock.total_units|default:stock.available_units|add:"5" }}</strong>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted d-block">Used</small>
+                  <strong>{{ stock.used_units|default:"0" }}</strong>
+                </div>
+              </div>
+
+              {% if stock.available_units < 5 %}
+              <div class="expiry-critical">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Critical Stock</strong> - Immediate replenishment needed
+              </div>
+              {% elif stock.available_units < 10 %}
+              <div class="expiry-warning">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Low Stock</strong> - Order more units soon
+              </div>
+              {% endif %}
+
+              <div class="mt-3">
+                <small class="text-muted">Last updated: {% if stock.updated_at %}{{ stock.updated_at|date:"M d, H:i" }}{% else %}{% now "M d, H:i" %}{% endif %}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <div class="text-center py-5">
+            <i class="bi bi-box display-1 text-muted"></i>
+            <h5 class="mt-3">No stock data available</h5>
+            <p class="text-muted">Please add blood inventory to see status</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Charts Section -->
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="bb-glass p-4">
+            <h6 class="fw-bold mb-3">Stock Distribution</h6>
+            <div class="chart-container">
+              <canvas id="stockChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="bb-glass p-4">
+            <h6 class="fw-bold mb-3">Expiry Timeline</h6>
+            <div class="chart-container">
+              <canvas id="expiryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="mt-4 bb-glass p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Recent Transactions</h5>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Blood Group</th>
+                <th>Type</th>
+                <th>Units</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in recent_donations %}
+              <tr>
+                <td>{{ d.created_at|date:"M d, H:i" }}</td>
+                <td><span class="badge bg-primary">{{ d.blood_group }}</span></td>
+                <td><span class="badge bg-success">IN</span></td>
+                <td>+{{ d.units_collected }}</td>
+                <td>{{ d.donor.city|default:"-" }}</td>
+                <td><span class="badge bg-success">Completed</span></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-muted text-center">No transactions yet. Record a donation to update stock.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ stock_labels|json_script:"stockLabels" }}
+{{ stock_values|json_script:"stockValues" }}
+{{ expiry_labels|json_script:"expiryLabels" }}
+{{ expiry_values|json_script:"expiryValues" }}
+
+<script>
+// Stock Distribution Chart
+const stockLabels = JSON.parse(document.getElementById('stockLabels').textContent);
+const stockValues = JSON.parse(document.getElementById('stockValues').textContent);
+const expiryLabels = JSON.parse(document.getElementById('expiryLabels').textContent);
+const expiryValues = JSON.parse(document.getElementById('expiryValues').textContent);
+
+const stockCtx = document.getElementById('stockChart').getContext('2d');
+new Chart(stockCtx, {
+  type: 'doughnut',
+  data: {
+    labels: stockLabels,
+    datasets: [{
+      data: stockValues,
+      backgroundColor: [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+        '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'
+      ],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+
+// Expiry Timeline Chart
+const expiryCtx = document.getElementById('expiryChart').getContext('2d');
+new Chart(expiryCtx, {
+  type: 'bar',
+  data: {
+    labels: expiryLabels,
+    datasets: [{
+      label: 'Units Expiring',
+      data: expiryValues,
+      backgroundColor: [
+        '#dc3545', '#ffc107', '#fd7e14', '#20c997', '#28a745'
+      ],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+function refreshInventory() {
+  location.reload();
+}
+</script>
+{% endblock %}

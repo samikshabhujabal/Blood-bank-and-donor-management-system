@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Features | AI Blood Bank{% endblock %}
+
+{% block content %}
+<div class="bb-glass bb-card p-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-stars" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">Platform Features</span>
+      </div>
+      <h3 class="fw-bold mt-3 mb-1">Key Features</h3>
+      <div class="text-muted">Explore the powerful features that make our platform the best choice for blood bank management.</div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-4">
+    <!-- Cloud Based -->
+    <div class="col-12" id="cloud-based">
+      <div class="bb-glass p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="feature-icon rounded-circle p-3 bg-light text-primary">
+            <i class="bi bi-cloud-check fs-4"></i>
+          </div>
+          <h4 class="fw-bold mb-0">Cloud Based Software</h4>
+        </div>
+        <p class="text-muted">Access your blood bank management system from anywhere, anytime. Whether you're on a phone, tablet, or laptop, our cloud-based architecture ensures you're always connected to your data with maximum security and zero downtime.</p>
+        <ul class="list-unstyled text-muted small">
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Access from any device</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Real-time data synchronization</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Secure cloud backups</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Automated Reports -->
+    <div class="col-12" id="automated-reports">
+      <div class="bb-glass p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="feature-icon rounded-circle p-3 bg-light text-danger">
+            <i class="bi bi-file-earmark-bar-graph fs-4"></i>
+          </div>
+          <h4 class="fw-bold mb-0">Automated Reports</h4>
+        </div>
+        <p class="text-muted">Eliminate manual paperwork with our automated reporting system. Generate daily reports, donor cards, and patient invoices automatically. Get critical updates delivered directly via email and integrated messaging services.</p>
+        <ul class="list-unstyled text-muted small">
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Automated PDF generation</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Email & WhatsApp integration</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Customizable report formats</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Compliance Made Simple -->
+    <div class="col-12" id="compliance">
+      <div class="bb-glass p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="feature-icon rounded-circle p-3 bg-light text-warning">
+            <i class="bi bi-shield-check fs-4"></i>
+          </div>
+          <h4 class="fw-bold mb-0">Compliance Made Simple</h4>
+        </div>
+        <p class="text-muted">Stay ahead of regulatory requirements. Our software is designed to meet NABH, NBTC, and Drugs & Cosmetics Act guidelines, ensuring your operations are always compliant with national standards.</p>
+        <ul class="list-unstyled text-muted small">
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> NABH & NBTC Compliant</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> End-to-end traceability</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Automated register maintenance</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Staff Activity Tracking -->
+    <div class="col-12" id="staff-tracking">
+      <div class="bb-glass p-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="feature-icon rounded-circle p-3 bg-light text-info">
+            <i class="bi bi-people fs-4"></i>
+          </div>
+          <h4 class="fw-bold mb-0">Staff Activity Tracking</h4>
+        </div>
+        <p class="text-muted">Monitor every action within your blood bank. From blood processing to component issuance, track staff activities in real-time to ensure accountability, reduce clerical errors, and improve overall operational quality.</p>
+        <ul class="list-unstyled text-muted small">
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Real-time activity monitoring</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Clerical error notifications</li>
+          <li><i class="bi bi-check2-circle me-2 text-success"></i> Detailed audit logs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

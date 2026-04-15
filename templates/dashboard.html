@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="bb-dashboard-hero mb-4">
+  <div class="position-relative" style="z-index: 1;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bb-glass">
+        <i class="bi bi-droplet-fill" style="color: var(--bb-red)"></i>
+        <span class="small fw-semibold">AI Powered <span style="color: var(--bb-red)">Blood</span> Bank</span>
+      </div>
+
+      <div class="bb-hero-controls">
+        <button class="bb-icon-btn" type="button" aria-label="Search" disabled>
+          <i class="bi bi-search"></i>
+        </button>
+        <button class="bb-icon-btn" type="button" aria-label="Notifications" disabled>
+          <i class="bi bi-bell"></i>
+        </button>
+        <a class="bb-avatar" href="{% url 'profile' %}" aria-label="Profile">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+      <div>
+        <h2 class="bb-hero-title fw-bold mt-3 mb-1">Admin Dashboard</h2>
+        <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
+          <span><i class="bi bi-geo-alt me-1"></i>Shreegan</span>
+          <span class="opacity-50">|</span>
+          <span>Welcome, {{ request.user.first_name|default:request.user.username }}</span>
+        </div>
+
+        <div class="bb-kpi-strip bb-glass mt-3">
+          <div class="bb-kpi-item">
+            <div class="text-muted small">Total Donors</div>
+            <div class="value">{{ total_donors }}</div>
+          </div>
+          <div class="bb-kpi-item">
+            <div class="text-muted small">Available Units</div>
+            <div class="value">{{ available_units }}</div>
+          </div>
+          <div class="bb-kpi-item">
+            <div class="text-muted small">Pending Requests</div>
+            <div class="value">{{ pending_requests }}</div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a class="btn btn-outline-gradient" href="{% url 'donor_register' %}"><i class="bi bi-person-plus me-2"></i>Register Donor</a>
+          <a class="btn btn-gradient" href="{% url 'record_donation' %}"><i class="bi bi-droplet-half me-2"></i>Record Donation</a>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-2 align-items-stretch" style="min-width: min(380px, 100%);">
+        <div class="bb-hero-art bb-card p-4">
+          <div class="orb red"></div>
+          <div class="orb blue"></div>
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-bold">Smart Matching Engine</div>
+              <div class="text-muted small">AI-assisted donor & stock suggestions</div>
+            </div>
+            <a class="btn btn-outline-gradient btn-sm" href="{% url 'profile' %}"><i class="bi bi-person-circle me-1"></i>Profile</a>
+          </div>
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            <span class="bb-mini-pill"><i class="bi bi-cpu" style="color: var(--bb-blue)"></i><span class="small fw-semibold">Prediction</span></span>
+            <span class="bb-mini-pill"><i class="bi bi-geo-alt" style="color: var(--bb-red)"></i><span class="small fw-semibold">Nearest Donor</span></span>
+            <span class="bb-mini-pill"><i class="bi bi-bell" style="color: var(--bb-blue)"></i><span class="small fw-semibold">Alerts</span></span>
+          </div>
+          <div class="mt-3 d-grid">
+            <a class="btn btn-gradient" href="{% url 'landing' %}"><i class="bi bi-lightning-charge-fill me-2"></i>Open AI Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="bb-glass bb-card p-4 mb-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="fw-bold">Process Flow Automation</div>
+    <span class="text-muted small">Collect Data → Eligibility → Donation → Inventory → Alerts</span>
+  </div>
+  <div class="row g-2 mt-2">
+    <div class="col-12 col-md">
+      <div class="bb-glass p-3" style="border-radius: 16px;">
+        <div class="fw-semibold"><i class="bi bi-clipboard-data me-2" style="color: var(--bb-blue)"></i>Collect Data</div>
+        <div class="text-muted small">Donor registration form</div>
+      </div>
+    </div>
+    <div class="col-12 col-md">
+      <div class="bb-glass p-3" style="border-radius: 16px;">
+        <div class="fw-semibold"><i class="bi bi-shield-check me-2" style="color: var(--bb-blue)"></i>Eligibility Check</div>
+        <div class="text-muted small">Rules based validation</div>
+      </div>
+    </div>
+    <div class="col-12 col-md">
+      <div class="bb-glass p-3" style="border-radius: 16px;">
+        <div class="fw-semibold"><i class="bi bi-droplet-half me-2" style="color: var(--bb-red)"></i>Record Donation</div>
+        <div class="text-muted small">Bag ID + units</div>
+      </div>
+    </div>
+    <div class="col-12 col-md">
+      <div class="bb-glass p-3" style="border-radius: 16px;">
+        <div class="fw-semibold"><i class="bi bi-box-seam me-2" style="color: var(--bb-blue)"></i>Update Inventory</div>
+        <div class="text-muted small">Auto stock update</div>
+      </div>
+    </div>
+    <div class="col-12 col-md">
+      <div class="bb-glass p-3" style="border-radius: 16px;">
+        <div class="fw-semibold"><i class="bi bi-bell me-2" style="color: var(--bb-red)"></i>Trigger Alerts</div>
+        <div class="text-muted small">Low stock / emergency</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="row g-3 mb-2">
+  <div class="col-lg-6">
+    <div class="bb-glass bb-card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold"><i class="bi bi-exclamation-circle me-2" style="color: var(--bb-red)"></i>Low Stock Alerts</div>
+        <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">Stock &lt; 10</span>
+      </div>
+      {% if low_stock_alerts %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for a in low_stock_alerts %}
+            <span class="bb-mini-pill"><i class="bi bi-droplet-fill" style="color: var(--bb-red)"></i><span class="small fw-semibold">{{ a.blood_group }}: {{ a.units }}</span></span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted">No low stock alerts.</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bb-glass bb-card p-4 ai-glow">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold"><i class="bi bi-lightning-charge-fill me-2" style="color: var(--bb-red)"></i>Emergency Match Alerts</div>
+        <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">AI Match</span>
+      </div>
+      {% if emergency_matches %}
+        <div class="d-flex flex-column gap-2">
+          {% for m in emergency_matches %}
+            <div class="bb-glass p-3" style="border-radius: 16px;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-semibold">{{ m.request.blood_group_required }} required</div>
+                  <div class="text-muted small">{{ m.request.hospital_name }}</div>
+                </div>
+                <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">Eligible: {{ m.eligible_count }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted">No emergency requests to match.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div class="fw-bold">Blood Donation Trends</div>
+  <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">Live</span>
+</div>
+
+<div class="row g-2">
+  {% for bg, units in trend_cards %}
+    <div class="col-md-4">
+      <div class="bb-glass bb-card p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">{{ bg }}</div>
+            <div class="text-muted small">{{ units }} units</div>
+          </div>
+          <i class="bi bi-droplet-fill" style="color: var(--bb-red)"></i>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-6">
+    <div class="bb-glass bb-card ai-glow p-4 chart-glow">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Blood Stock Level</div>
+        <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">AI Demand Forecast</span>
+      </div>
+      <canvas id="demandChart" height="120"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bb-glass bb-card p-4 chart-glow">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold">Recent Emergency Requests</div>
+        <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">Priority</span>
+      </div>
+      <canvas id="groupChart" height="120"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<div class="row g-3 mt-3">
+  <div class="col-lg-6">
+    <div class="ai-alert p-4 bb-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>AI Alert</div>
+        <span class="badge" style="background: rgba(255,255,255,0.18); color: #fff;">AI</span>
+      </div>
+      {% if ai_alert %}
+        <div class="muted mt-2">{{ ai_alert.blood_group }} blood stock predicted to drop in {{ ai_alert.days }} days</div>
+        <div class="mt-2"><span class="fw-semibold">Recommended Action:</span> {{ ai_alert.action }}</div>
+      {% else %}
+        <div class="muted mt-2">No alerts at the moment.</div>
+      {% endif %}
+      <div class="mt-3 d-grid">
+        <button class="btn btn-light fw-semibold" disabled>Notify donors nearby</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="bb-glass bb-card ai-glow p-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="fw-bold"><i class="bi bi-stars me-2" style="color: var(--bb-red)"></i>Recommended Donor</div>
+        <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">AI Score 92%</span>
+      </div>
+      {% if recommended_donor %}
+        <div class="mt-3">
+          <div class="fw-semibold">Name: {{ recommended_donor.name }}</div>
+          <div class="text-muted small">Blood Group: {{ recommended_donor.blood_group }}</div>
+          <div class="text-muted small">Distance: 2.1 km</div>
+        </div>
+      {% else %}
+        <div class="mt-3 text-muted">No donors available yet.</div>
+      {% endif %}
+      <div class="mt-3 d-grid">
+        <button class="btn btn-gradient" disabled><i class="bi bi-send me-2"></i>Request Donation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+  <div class="fw-bold">Emergency Request</div>
+  <span class="text-muted small">Red glow cards</span>
+</div>
+
+<div class="row g-2">
+  {% for req in emergency_requests %}
+    <div class="col-md-4">
+      <div class="emergency-glow bb-card p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">Patient Blood Group: {{ req.blood_group_required }}</div>
+            <div class="text-muted small">Hospital: {{ req.hospital_name }}</div>
+            <div class="text-muted small">Units Required: {{ req.units_needed }}</div>
+          </div>
+          <i class="bi bi-lightning-charge-fill" style="color: var(--bb-red)"></i>
+        </div>
+        <div class="d-grid mt-2">
+          <button class="btn btn-outline-gradient btn-sm" disabled>Find Donor</button>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="bb-glass p-3 text-muted">No emergency requests yet.</div>
+    </div>
+  {% endfor %}
+</div>
+
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+  <div class="fw-bold">Blood Stock Level</div>
+  <span class="text-muted small">Quick view</span>
+</div>
+
+<div class="row g-2">
+  {% for bg, units in stock_grid %}
+    <div class="col-6 col-md-2">
+      <div class="stock-card p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">{{ bg }}</div>
+            <div class="text-muted small">{{ units }} Units Available</div>
+          </div>
+          <span aria-hidden="true">🩸</span>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+
+<div class="mt-4 bb-glass bb-card bb-table">
+  <div class="p-4 pb-2 d-flex justify-content-between align-items-center">
+    <div class="fw-bold">Blood Card</div>
+    <span class="badge" style="background: rgba(69,123,157,0.12); color: var(--bb-blue);">Donors</span>
+  </div>
+  <div class="px-4 pb-4">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Donor</th>
+            <th>Blood</th>
+            <th>City</th>
+            <th>Last Donation</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for donor in recent_donors %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="stat-icon" style="background: rgba(69,123,157,0.14); color: var(--bb-blue);"><i class="bi bi-person"></i></div>
+                  <div>
+                    <div class="fw-semibold">{{ donor.name }}</div>
+                    <div class="text-muted small">{{ donor.phone_number }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge" style="background: rgba(230,57,70,0.12); color: var(--bb-red);">{{ donor.blood_group }}</span>
+              </td>
+              <td>{{ donor.city }}</td>
+              <td class="text-muted">{{ donor.last_donation_date|default:"-" }}</td>
+              <td class="text-end"><a class="btn btn-outline-gradient btn-sm" href="{% url 'donor_detail' donor.id %}">View</a></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">No donors yet. Add donors from Admin panel.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ demand_labels|json_script:"demandLabels" }}
+{{ demand_values|json_script:"demandValues" }}
+{{ emergency_labels|json_script:"emergencyLabels" }}
+{{ emergency_values|json_script:"emergencyValues" }}
+<script>
+  const demandCtx = document.getElementById('demandChart');
+  if (demandCtx) {
+    const labels = JSON.parse(document.getElementById('demandLabels').textContent);
+    const values = JSON.parse(document.getElementById('demandValues').textContent);
+
+    const gradient = demandCtx.getContext('2d').createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(69,123,157,0.55)');
+    gradient.addColorStop(1, 'rgba(230,57,70,0.05)');
+
+    new Chart(demandCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Units',
+          data: values,
+          borderColor: '#457B9D',
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          pointRadius: 3,
+          pointBackgroundColor: '#E63946'
+        }]
+      },
+      options: {
+        animation: { duration: 1200 },
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  const groupCtx = document.getElementById('groupChart');
+  if (groupCtx) {
+    const labels = JSON.parse(document.getElementById('emergencyLabels').textContent);
+    const values = JSON.parse(document.getElementById('emergencyValues').textContent);
+    const palette = [
+      'rgba(230,57,70,0.82)',
+      'rgba(69,123,157,0.82)',
+      'rgba(255,123,133,0.78)',
+      'rgba(168,218,220,0.78)',
+      'rgba(224,49,49,0.80)',
+      'rgba(29,53,87,0.78)',
+      'rgba(250,82,82,0.78)',
+      'rgba(142,202,230,0.78)'
+    ];
+    new Chart(groupCtx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: labels.map((_, i) => palette[i % palette.length]),
+          borderColor: 'rgba(255,255,255,0.45)',
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        animation: { duration: 1100 },
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#1a1f2b', boxWidth: 10, boxHeight: 10 }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(11,18,32,0.92)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(255,255,255,0.18)',
+            borderWidth: 1
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}
