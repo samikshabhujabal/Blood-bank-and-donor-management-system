@@ -13,6 +13,7 @@ xhtml2pdf==0.2.11
 python-bidi==0.4.2
 Pillow==9.5.0
 svglib==1.5.1
+python-3.11.9
 
 gunicorn==21.2.0
 
