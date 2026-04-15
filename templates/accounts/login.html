@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <div class="bb-glass bb-card ai-glow p-4 p-md-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="icon-pill" style="background: rgba(69,123,157,0.14); color: var(--bb-blue);"><i class="bi bi-shield-lock"></i></div>
+          <div>
+            <h3 class="mb-0 fw-bold">Welcome back</h3>
+            <div class="text-muted small">Login to access your dashboard</div>
+          </div>
+        </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" type="text" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input class="form-control" type="password" name="password" required>
+          </div>
+          <button class="btn btn-gradient w-100 btn-lg" type="submit">Login</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <a href="{% url 'register' %}" class="text-decoration-none">Create an account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
